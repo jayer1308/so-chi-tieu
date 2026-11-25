@@ -1,6 +1,6 @@
 # GOAL-002 v1: Lệnh liet-ke thêm cờ --gioi-han N: chỉ hiện N khoản chi mới nhất; N không hợp lệ bị từ chối bằng lỗi tiếng Việt
 
-Status: approved
+Status: executing
 
 ```json
 {
