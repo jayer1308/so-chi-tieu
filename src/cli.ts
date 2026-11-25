@@ -8,7 +8,7 @@ export function usage(): string {
     "",
     "Sử dụng:",
     "  sct them --so-tien <n> --danh-muc <ten> [--ghi-chu <text>] [--ngay YYYY-MM-DD]",
-    "  sct liet-ke [--thang YYYY-MM] [--danh-muc <ten>]",
+    "  sct liet-ke [--thang YYYY-MM] [--danh-muc <ten>] [--gioi-han N]",
     "  sct tong-ket [--thang YYYY-MM]",
     "  sct xoa --id <id>",
     "  sct xuat [--thang YYYY-MM] --file <path>",
@@ -35,6 +35,7 @@ const KNOWN_FLAGS = new Set([
   "--ghi-chu",
   "--ngay",
   "--thang",
+  "--gioi-han",
   "--id",
   "--file",
 ]);
@@ -214,6 +215,21 @@ function cmdLietKe(flags: Flags, dataFile: string): number {
   if (month !== undefined && !isValidMonth(month)) {
     return fail("tháng không hợp lệ. Tháng phải đúng định dạng YYYY-MM.");
   }
+  const rawLimit = flags["--gioi-han"];
+  let limit: number | undefined;
+  if (rawLimit !== undefined) {
+    if (!/^\d+$/.test(rawLimit.trim())) {
+      return fail(
+        "giới hạn không hợp lệ. --gioi-han phải là số nguyên lớn hơn 0.",
+      );
+    }
+    limit = Number(rawLimit);
+    if (!Number.isSafeInteger(limit) || limit <= 0) {
+      return fail(
+        "giới hạn không hợp lệ. --gioi-han phải là số nguyên lớn hơn 0.",
+      );
+    }
+  }
   const loaded = loadExpenses(dataFile);
   if (loaded.error) return fail(loaded.error);
   let list = loaded.expenses;
@@ -225,11 +241,12 @@ function cmdLietKe(flags: Flags, dataFile: string): number {
     list = list.filter((e) => e["danh-muc"] === category);
   }
   const sorted = sortNewestFirst(list);
-  if (sorted.length === 0) {
+  const shown = limit === undefined ? sorted : sorted.slice(0, limit);
+  if (shown.length === 0) {
     process.stdout.write("Không có khoản chi nào.\n");
     return 0;
   }
-  for (const e of sorted) {
+  for (const e of shown) {
     process.stdout.write(formatExpense(e) + "\n");
   }
   return 0;
