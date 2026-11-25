@@ -1,6 +1,6 @@
 # GOAL-003 v1: Lệnh tong-ket thêm cờ --nam YYYY: tổng kết cả năm theo từng tháng; năm không hợp lệ bị từ chối bằng lỗi tiếng Việt
 
-Status: executing
+Status: verified
 
 ```json
 {
