@@ -1,0 +1,49 @@
+# EXEC-3 v1: solo-direct
+
+Mở rộng lệnh tong-ket trong src/cli.ts: thêm --nam vào KNOWN_FLAGS và dòng usage của tong-ket; khi có --nam, kiểm tra giá trị là số nguyên trong khoảng 1900–2100 (không phải số, số thập phân, ngoài khoảng đều bị từ chối bằng lỗi tiếng Việt ra process.stderr, thoát mã khác 0, không in tổng kết), khi hợp lệ in tổng kết cả năm gồm đủ 12 dòng tháng 1 tới tháng 12, mỗi dòng có tháng, tổng chi và số khoản (tháng không có khoản chi hiện tổng 0, số khoản 0), chỉ tính khoản chi của đúng năm đó; khi không có --nam giữ nguyên hành vi tổng kết một tháng như cũ. Thêm test acceptance trong src/ cho AC-1 (đủ 12 dòng, tổng và số khoản đúng từng tháng, không tính khoản chi năm khác), AC-2 (không cờ tổng kết tháng như cũ) và AC-3 (abc, 1899, 2101, 2026.5 đều lỗi tiếng Việt, exit khác 0, không in tổng kết). Không thêm dependency, không đổi các lệnh khác, định dạng tổng kết tháng hay file dữ liệu.
+
+```json
+{
+  "id": "EXEC-3",
+  "version": 1,
+  "goalId": "GOAL-003",
+  "goalVersion": 1,
+  "mode": "solo-direct",
+  "approach": "Mở rộng lệnh tong-ket trong src/cli.ts: thêm --nam vào KNOWN_FLAGS và dòng usage của tong-ket; khi có --nam, kiểm tra giá trị là số nguyên trong khoảng 1900–2100 (không phải số, số thập phân, ngoài khoảng đều bị từ chối bằng lỗi tiếng Việt ra process.stderr, thoát mã khác 0, không in tổng kết), khi hợp lệ in tổng kết cả năm gồm đủ 12 dòng tháng 1 tới tháng 12, mỗi dòng có tháng, tổng chi và số khoản (tháng không có khoản chi hiện tổng 0, số khoản 0), chỉ tính khoản chi của đúng năm đó; khi không có --nam giữ nguyên hành vi tổng kết một tháng như cũ. Thêm test acceptance trong src/ cho AC-1 (đủ 12 dòng, tổng và số khoản đúng từng tháng, không tính khoản chi năm khác), AC-2 (không cờ tổng kết tháng như cũ) và AC-3 (abc, 1899, 2101, 2026.5 đều lỗi tiếng Việt, exit khác 0, không in tổng kết). Không thêm dependency, không đổi các lệnh khác, định dạng tổng kết tháng hay file dữ liệu.",
+  "risks": [
+    "Cờ --nam phải kết hợp đúng với --thang nếu cả hai cùng có: --nam thắng và tổng kết cả năm, hoặc --thang bị bỏ qua một cách có chủ ý — cần quyết định rõ trong code và test",
+    "Giá trị --nam dạng số thập phân (2026.5) hoặc chuỗi có khoảng trắng phải bị từ chối, không được làm tròn hay ép kiểu lặng lẽ",
+    "Tổng kết năm phải đủ đúng 12 dòng kể cả tháng trống, theo thứ tự tháng 1 tới tháng 12"
+  ],
+  "baseCommit": "e5e3950c68e42b605abe12c41818e341aff4c703",
+  "sourceSha256": "9a548b9712c4e8ea0202ab2bfb85d53d47a6835648e151ea0986574316ce5ce0",
+  "estimatedCost": {
+    "wallMinutes": 30
+  },
+  "rationale": "Goal nhỏ, một thay đổi gắn kết trong lệnh tong-ket của src/cli.ts, một owner giữ toàn bộ ngữ cảnh là đủ; không có seam độc lập nào để tách Multi-WP.",
+  "sharedPaths": [],
+  "paths": [
+    "src/**"
+  ],
+  "stubPaths": [],
+  "entries": [
+    "src/cli.ts:main",
+    "src/cli.ts:usage"
+  ],
+  "acceptanceMapping": [
+    {
+      "acceptanceId": "AC-1",
+      "verification": "npm test"
+    },
+    {
+      "acceptanceId": "AC-2",
+      "verification": "npm test"
+    },
+    {
+      "acceptanceId": "AC-3",
+      "verification": "npm test"
+    }
+  ],
+  "verificationStrategy": "Run npm test; then npm run build"
+}
+```
