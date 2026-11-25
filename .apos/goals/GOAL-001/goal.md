@@ -1,6 +1,6 @@
 # GOAL-001 v1: Sổ chi tiêu v1: CLI thêm, liệt kê, tổng kết, xóa và xuất CSV các khoản chi, dữ liệu lưu file JSON
 
-Status: approved
+Status: executing
 
 ```json
 {
