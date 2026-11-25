@@ -9,7 +9,7 @@ export function usage(): string {
     "Sử dụng:",
     "  sct them --so-tien <n> --danh-muc <ten> [--ghi-chu <text>] [--ngay YYYY-MM-DD]",
     "  sct liet-ke [--thang YYYY-MM] [--danh-muc <ten>] [--gioi-han N]",
-    "  sct tong-ket [--thang YYYY-MM]",
+    "  sct tong-ket [--thang YYYY-MM] [--nam YYYY]",
     "  sct xoa --id <id>",
     "  sct xuat [--thang YYYY-MM] --file <path>",
     "",
@@ -35,6 +35,7 @@ const KNOWN_FLAGS = new Set([
   "--ghi-chu",
   "--ngay",
   "--thang",
+  "--nam",
   "--gioi-han",
   "--id",
   "--file",
@@ -76,6 +77,16 @@ function isValidMonth(value: string): boolean {
   if (!m) return false;
   const month = Number(m[2]);
   return month >= 1 && month <= 12;
+}
+
+/**
+ * Năm hợp lệ: chỉ gồm chữ số (không khoảng trắng, không thập phân,
+ * không ép kiểu lặng lẽ) và là số nguyên trong khoảng 1900–2100.
+ */
+function isValidYear(value: string): boolean {
+  if (!/^\d+$/.test(value)) return false;
+  const year = Number(value);
+  return Number.isSafeInteger(year) && year >= 1900 && year <= 2100;
 }
 
 /**
@@ -252,7 +263,39 @@ function cmdLietKe(flags: Flags, dataFile: string): number {
   return 0;
 }
 
+/**
+ * Tổng kết tháng (mặc định) hoặc cả năm (khi có --nam).
+ * Khi --nam và --thang cùng có thì --nam thắng: tổng kết cả năm, --thang
+ * bị bỏ qua một cách có chủ ý (quyết định ghi rõ, xem test GOAL-003 AC-1).
+ */
 function cmdTongKet(flags: Flags, dataFile: string): number {
+  const rawYear = flags["--nam"];
+  if (rawYear !== undefined) {
+    if (!isValidYear(rawYear)) {
+      return fail(
+        "năm không hợp lệ. --nam phải là số nguyên trong khoảng 1900–2100.",
+      );
+    }
+    const year = Number(rawYear);
+    const loaded = loadExpenses(dataFile);
+    if (loaded.error) return fail(loaded.error);
+    process.stdout.write(`Tổng kết năm ${year}:\n`);
+    for (let month = 1; month <= 12; month++) {
+      const prefix = `${year}-${String(month).padStart(2, "0")}`;
+      let total = 0;
+      let count = 0;
+      for (const e of loaded.expenses) {
+        if (e.ngay.startsWith(prefix)) {
+          total += e["so-tien"];
+          count++;
+        }
+      }
+      process.stdout.write(
+        `Tháng ${String(month).padStart(2, "0")}: tổng ${total}, ${count} khoản\n`,
+      );
+    }
+    return 0;
+  }
   const month = flags["--thang"] ?? currentMonth();
   if (!isValidMonth(month)) {
     return fail("tháng không hợp lệ. Tháng phải đúng định dạng YYYY-MM.");
